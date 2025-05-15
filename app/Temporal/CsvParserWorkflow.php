@@ -42,7 +42,7 @@ final readonly class CsvParserWorkflow
         }
 
         if ($errors) {
-
+            // Handle errors
         }
     }
 }

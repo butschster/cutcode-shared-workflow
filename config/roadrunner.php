@@ -42,8 +42,9 @@ return [
         'defaultWorker' => env('TEMPORAL_TASK_QUEUE', TemporalWorkerFactoryInterface::DEFAULT_TASK_QUEUE),
         'workers' => [],
         'declarations' => [
-            \App\Temporal\SimpleActivity::class,
-            \App\Temporal\SimpleWorkflow::class,
+            \App\Temporal\CsvParserWorkflow::class,
+            \App\Temporal\CsvParserActivity::class,
+            \App\Temporal\CsvSplitterActivity::class,
         ],
     ],
 
