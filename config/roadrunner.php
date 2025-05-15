@@ -12,6 +12,7 @@ use Spiral\RoadRunnerLaravel\Temporal\Config\TlsConfig;
 use Spiral\RoadRunnerLaravel\Temporal\TemporalWorker;
 use Temporal\Client\ClientOptions;
 use Temporal\Worker\WorkerFactoryInterface as TemporalWorkerFactoryInterface;
+use Temporal\Worker\WorkerOptions;
 
 return [
     'cache' => [
@@ -40,7 +41,11 @@ return [
             ),
         ],
         'defaultWorker' => env('TEMPORAL_TASK_QUEUE', TemporalWorkerFactoryInterface::DEFAULT_TASK_QUEUE),
-        'workers' => [],
+        'workers' => [
+            'default' => WorkerOptions::new()->withIdentity(
+                env('TEMPORAL_IDENTITY', 'cut-code'),
+            ),
+        ],
         'declarations' => [
             \App\Temporal\CsvParserWorkflow::class,
             \App\Temporal\CsvParserActivity::class,
