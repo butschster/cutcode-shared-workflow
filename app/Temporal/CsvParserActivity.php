@@ -6,11 +6,13 @@ namespace App\Temporal;
 
 use Illuminate\Support\Lottery;
 use Psr\Log\LoggerInterface;
+use Spiral\RoadRunnerLaravel\Temporal\Attribute\AssignWorker;
 use Temporal\Activity\ActivityInterface;
 use Temporal\Activity\ActivityMethod;
 use Temporal\Exception\Failure\ApplicationFailure;
 use Temporal\Support\VirtualPromise;
 
+#[AssignWorker(taskQueue: 'csv_parser')]
 #[ActivityInterface]
 final readonly class CsvParserActivity
 {

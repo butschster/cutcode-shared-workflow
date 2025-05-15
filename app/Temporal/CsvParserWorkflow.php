@@ -27,7 +27,9 @@ final readonly class CsvParserWorkflow
 
         $parser = Workflow::newActivityStub(
             class: CsvParserActivity::class,
-            options: ActivityOptions::new()->withStartToCloseTimeout('1 minute'),
+            options: ActivityOptions::new()
+                ->withTaskQueue('csv_parser')
+                ->withStartToCloseTimeout('1 minute'),
         );
 
         $batches = \array_chunk($chunks->chunks, $batchSize);
