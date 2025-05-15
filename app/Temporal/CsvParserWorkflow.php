@@ -11,55 +11,71 @@ use Temporal\Workflow\WorkflowInterface;
 use Temporal\Workflow\WorkflowMethod;
 
 #[WorkflowInterface]
-final readonly class CsvParserWorkflow
+final class CsvParserWorkflow
 {
+    private array $chunks;
+    private int $totalToFetch = 0;
+
     #[WorkflowMethod('csv_parser.parse')]
     public function parse(string $s3Path)
     {
         yield Workflow::newUntypedActivityStub(
             options: ActivityOptions::new()
                 ->withTaskQueue('splitter')
-                ->withStartToCloseTimeout('10 minutes'),
+                ->withStartToCloseTimeout('60 minutes'),
         )->execute('Hello');
 
-        $chunks = yield Workflow::newActivityStub(
-            class: CsvSplitterActivity::class,
+        $chunks = yield Workflow::newUntypedActivityStub(
             options: ActivityOptions::new()
                 ->withTaskQueue('splitter')
-                ->withStartToCloseTimeout('10 minutes'),
-        )->split($s3Path);
+                ->withStartToCloseTimeout('60 minutes'),
+        )->execute(name: 'Split', args: [$s3Path], returnType: CsvChunks::class);
+
+        $this->chunks = $chunks->chunks;
 
         $batchSize = 10;
 
-        $errors = [];
+        $parserChunks = \array_chunk($chunks->chunks, $batchSize);
 
         $parser = Workflow::newActivityStub(
             class: CsvParserActivity::class,
             options: ActivityOptions::new()
-                ->withTaskQueue('csv_parser')
-                ->withStartToCloseTimeout('1 minute'),
+                ->withStartToCloseTimeout('60 minutes'),
         );
 
-        $batches = \array_chunk($chunks->chunks, $batchSize);
+        $errors = [];
 
-        foreach ($batches as $batch) {
+        $this->totalToFetch = \count($parserChunks);
+
+        foreach ($parserChunks as $i => $chunk) {
             yield Promise::all(
                 \array_map(
-                    static fn($chunk) => $parser->parse($chunk)->then(
-                        onRejected: static function () use (
-                            &$errors,
-                            $chunk,
-                        ) {
-                            $errors[] = $chunk;
+                    fn(CsvChunk $chunk) => $parser->parse($chunk)->then(
+                        onRejected: static function ($error) use ($i, $chunk, &$errors) {
+                            $errors[] = [
+                                'chunk' => $chunk,
+                                'error' => $error,
+                            ];
                         },
                     ),
-                    $batch,
+                    $chunk,
                 ),
             );
-        }
 
-        if ($errors) {
-            // Handle errors
+            $this->totalToFetch--;
         }
+        // Handle errors
+    }
+
+    #[Workflow\QueryMethod]
+    public function totalChunks(): int
+    {
+        return \count($this->chunks);
+    }
+
+    #[Workflow\QueryMethod]
+    public function totalToFetch(): int
+    {
+        return $this->totalToFetch;
     }
 }

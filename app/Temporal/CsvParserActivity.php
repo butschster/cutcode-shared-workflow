@@ -12,7 +12,7 @@ use Temporal\Activity\ActivityMethod;
 use Temporal\Exception\Failure\ApplicationFailure;
 use Temporal\Support\VirtualPromise;
 
-#[AssignWorker(taskQueue: 'csv_parser')]
+//#[AssignWorker(taskQueue: 'csv_parser')]
 #[ActivityInterface]
 final readonly class CsvParserActivity
 {

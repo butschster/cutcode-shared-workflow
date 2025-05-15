@@ -20,11 +20,11 @@ final readonly class CsvSplitterActivity
     public function split(string $s3Path): CsvChunks
     {
         $chunks = [];
-        $randNumber = \random_int(10, 1000);
+        $randNumber = \random_int(1000, 10000);
 
         for ($i = 0; $i < $randNumber; $i++) {
             $chunks[] = new CsvChunk(
-                s3Path: $s3Path,
+                s3Path: "/chunk-$i.csv",
                 number: $i,
                 offset: $i * 1000,
                 length: 1 * 1024 * 1024,
