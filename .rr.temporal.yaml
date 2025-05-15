@@ -1,0 +1,16 @@
+version: '3'
+rpc:
+  listen: 'tcp://127.0.0.1:6001'
+
+server:
+  command: 'php vendor/bin/rr-worker start'
+  relay: pipes
+
+temporal:
+  address: '127.0.0.1:7233'
+  activities:
+    num_workers: 10
+
+logs:
+  level: error # mapped to all plugins
+  mode: production

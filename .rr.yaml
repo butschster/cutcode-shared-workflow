@@ -1,0 +1,53 @@
+version: '3'
+rpc:
+  listen: 'tcp://127.0.0.1:6001'
+
+server:
+  command: 'php vendor/bin/rr-worker start'
+  relay: pipes
+
+http:
+  address: '0.0.0.0:8000'
+  middleware:
+    - gzip
+    - static
+  static:
+    dir: public
+    forbid:
+      - .php
+      - .htaccess
+  pool:
+    num_workers: 1
+    supervisor:
+      max_worker_memory: 100
+
+jobs:
+  consume: [ "default" ]
+  pipelines:
+    default:
+      driver: memory
+      config: { }
+  pool:
+    num_workers: 2
+
+temporal:
+  address: eu-west-1.aws.api.temporal.io:7233
+  cache_size: 1
+  namespace: dev-ss.il9tm
+  tls:
+    server_name: eu-west-1.aws.api.temporal.io
+  activities:
+    num_workers: 10
+
+kv:
+  local:
+    driver: memory
+    config:
+      interval: 60
+
+logs:
+  level: error # mapped to all plugins
+  mode: production
+
+metrics:
+  address: '127.0.0.1:2112'
