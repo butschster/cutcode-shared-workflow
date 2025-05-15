@@ -16,10 +16,23 @@ final readonly class CsvParserWorkflow
     #[WorkflowMethod('csv_parser.parse')]
     public function parse(string $s3Path)
     {
-        $chunks = yield Workflow::newActivityStub(
-            class: CsvSplitterActivity::class,
-            options: ActivityOptions::new()->withStartToCloseTimeout('10 minutes'),
-        )->split($s3Path);
+        yield Workflow::newUntypedActivityStub(
+            options: ActivityOptions::new()
+                ->withTaskQueue('splitter')
+                ->withStartToCloseTimeout('10 minutes'),
+        )->execute('Hello');
+
+        $chunks = yield Workflow::newUntypedActivityStub(
+            options: ActivityOptions::new()
+                ->withTaskQueue('splitter')
+                ->withStartToCloseTimeout('10 minutes'),
+        )->execute('Split', [$s3Path]);
+//            yield Workflow::newActivityStub(
+//            class: CsvSplitterActivity::class,
+//            options: ActivityOptions::new()
+//                ->withTaskQueue('splitter')
+//                ->withStartToCloseTimeout('10 minutes'),
+//        )->split($s3Path);
 
         $batchSize = 10;
 

@@ -49,7 +49,7 @@ return [
         'declarations' => [
             \App\Temporal\CsvParserWorkflow::class,
             \App\Temporal\CsvParserActivity::class,
-            \App\Temporal\CsvSplitterActivity::class,
+            //\App\Temporal\CsvSplitterActivity::class,
         ],
     ],
 
