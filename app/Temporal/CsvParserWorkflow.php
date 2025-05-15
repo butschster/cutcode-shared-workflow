@@ -25,20 +25,27 @@ final readonly class CsvParserWorkflow
 
         $errors = [];
 
-        $promises = [];
-        foreach ($chunks->chunks as $i => $chunk) {
-            $promises[] = Workflow::newActivityStub(
-                class: CsvParserActivity::class,
-                options: ActivityOptions::new()->withStartToCloseTimeout('1 minute'),
-            )->parse($chunk)->then(onRejected: static function () use (&$errors, $chunk) {
-                $errors[] = $chunk;
-            });
-        }
+        $parser = Workflow::newActivityStub(
+            class: CsvParserActivity::class,
+            options: ActivityOptions::new()->withStartToCloseTimeout('1 minute'),
+        );
 
-        $batches = \array_chunk($promises, $batchSize);
+        $batches = \array_chunk($chunks->chunks, $batchSize);
 
         foreach ($batches as $batch) {
-            $results = yield Promise::all($batch);
+            yield Promise::all(
+                \array_map(
+                    static fn($chunk) => $parser->parse($chunk)->then(
+                        onRejected: static function () use (
+                            &$errors,
+                            $chunk,
+                        ) {
+                            $errors[] = $chunk;
+                        },
+                    ),
+                    $batch,
+                ),
+            );
         }
 
         if ($errors) {

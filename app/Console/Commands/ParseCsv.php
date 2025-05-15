@@ -8,13 +8,15 @@ use Temporal\Client\WorkflowClientInterface;
 
 class ParseCsv extends Command
 {
-    protected $signature = 'app:parse-csv {file}';
+    protected $signature = 'app:parse-csv';
     protected $description = 'Parse CSV file';
 
     public function handle(WorkflowClientInterface $client)
     {
-        $client->newWorkflowStub(
+        $wf = $client->newWorkflowStub(
             CsvParserWorkflow::class,
         );
+
+        $client->start($wf, 'path/to/file.csv');
     }
 }
