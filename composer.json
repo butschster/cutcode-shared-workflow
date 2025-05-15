@@ -10,11 +10,9 @@
   "license": "MIT",
   "require": {
     "php": "^8.2",
-    "laravel-workflow/laravel-workflow": "^1.0",
-    "laravel-workflow/waterline": "^1.0",
     "laravel/framework": "^12.0",
     "laravel/tinker": "^2.10.1",
-    "roadrunner-php/laravel-bridge": "^6.0"
+    "roadrunner-php/laravel-bridge": "dev-hotfix/task-queue-attribute as 6.0.2"
   },
   "require-dev": {
     "fakerphp/faker": "^1.23",
