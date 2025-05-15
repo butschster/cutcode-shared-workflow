@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Temporal;
 
+use Spiral\RoadRunnerLaravel\Temporal\Attribute\AssignWorker;
 use Temporal\Activity\ActivityInterface;
 use Temporal\Activity\ActivityMethod;
 use Temporal\Support\VirtualPromise;
 
+#[AssignWorker(taskQueue: 'splitter')]
 #[ActivityInterface]
 final readonly class CsvSplitterActivity
 {

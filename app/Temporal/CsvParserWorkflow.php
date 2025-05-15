@@ -22,17 +22,12 @@ final readonly class CsvParserWorkflow
                 ->withStartToCloseTimeout('10 minutes'),
         )->execute('Hello');
 
-        $chunks = yield Workflow::newUntypedActivityStub(
+        $chunks = yield Workflow::newActivityStub(
+            class: CsvSplitterActivity::class,
             options: ActivityOptions::new()
                 ->withTaskQueue('splitter')
                 ->withStartToCloseTimeout('10 minutes'),
-        )->execute('Split', [$s3Path]);
-//            yield Workflow::newActivityStub(
-//            class: CsvSplitterActivity::class,
-//            options: ActivityOptions::new()
-//                ->withTaskQueue('splitter')
-//                ->withStartToCloseTimeout('10 minutes'),
-//        )->split($s3Path);
+        )->split($s3Path);
 
         $batchSize = 10;
 
